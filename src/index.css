@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ... */
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+  }
+}
+
+body {
+  background-image: url("src/assets/main bg.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 100vh;
+  width: auto;
+  backdrop-filter: blur(10px);
+}
+
+.shadow {
+}
