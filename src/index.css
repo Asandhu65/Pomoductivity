@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ... */
-
 @layer base {
   :root {
     --radius: 0.5rem;
@@ -20,5 +18,15 @@ body {
   backdrop-filter: blur(10px);
 }
 
-.shadow {
+.timer-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.timer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 50px;
+  text-shadow: 4px 4px 4px rgba(0, 0, 0, 0.586);
 }
