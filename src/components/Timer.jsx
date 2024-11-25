@@ -11,7 +11,7 @@ const timerProps = {
 const renderTimer = (dimension, time) => {
   return (
     <div className="timer">
-      <div className="text-3xl font-medium">Session Name</div>
+      <div className="text-3xl font-medium relative -top-20">Session Name</div>
       <div>{time}</div>
       <div>{dimension}</div>
     </div>
@@ -30,6 +30,17 @@ function Timer() {
 
   return (
     <div>
+      <div className="flex justify-center shadow-lg w-[672px] rounded-md">
+        <p className="text-xl text-white font-medium [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-grey bg-opacity-30  rounded-tl-md rounded-bl-md w-56 m-0 p-2 flex justify-center">
+          0 Pomodoro&apos;s
+        </p>
+        <p className="text-xl text-white font-medium [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-grey bg-opacity-30  w-56 m-0 p-2 flex justify-center ">
+          0 Breaks
+        </p>
+        <p className="text-xl text-white font-medium [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-grey bg-opacity-30  rounded-tr-md rounded-br-md w-56 m-0 p-2 flex justify-center">
+          0 Long Breaks
+        </p>
+      </div>
       <div className="timer-wrapper">
         <CountdownCircleTimer
           {...timerProps}
@@ -46,17 +57,17 @@ function Timer() {
           )}
         </CountdownCircleTimer>
         <div className="btns">
-          <Button className="DEFAULT bg-opacity-40 shadow-lg p-3 m-3">
+          <Button className="bg-grey bg-opacity-30 shadow-lg p-3 m-3">
             <div className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
               Start
             </div>
           </Button>
-          <Button className="DEFAULT bg-opacity-40 shadow-lg p-3 m-3">
+          <Button className="bg-grey bg-opacity-30 shadow-lg p-3 m-3">
             <div className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
               Stop
             </div>
           </Button>
-          <Button className="DEFAULT bg-opacity-40 shadow-lg p-3 m-3">
+          <Button className="bg-grey bg-opacity-30 shadow-lg p-3 m-3">
             <div className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
               Reset
             </div>

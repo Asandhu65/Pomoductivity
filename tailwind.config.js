@@ -11,9 +11,7 @@ module.exports = {
         sm: "calc(var(--radius) - 4px)",
       },
       colors: {
-        "main grey": {
-          DEFAULT: "#3C3C3D",
-        },
+        grey: "#3C3C3D",
       },
     },
   },

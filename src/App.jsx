@@ -6,11 +6,18 @@ import Timer from "./components/Timer.jsx";
 function App() {
   return (
     <div>
-      <Button className="DEFAULT bg-opacity-40 shadow-lg p-2">
-        <div className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
-          To-Do List
-        </div>
-      </Button>
+      <div className="flex justify-between p-4">
+        <Button className="grey bg-opacity-20 shadow-lg p-2">
+          <div className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
+            To-Do List
+          </div>
+        </Button>
+        <Button className="grey bg-opacity-20 shadow-lg p-2 justify-end">
+          <div className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
+            Set Custom Timer
+          </div>
+        </Button>
+      </div>
       <Timer />
     </div>
   );
