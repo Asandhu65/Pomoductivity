@@ -1,3 +1,70 @@
-function Timer() {}
+import { CountdownCircleTimer } from "react-countdown-circle-timer";
+import { Button } from "./ui/button.jsx";
+
+const timerProps = {
+  isPlaying: true,
+  size: 600,
+  strokeWidth: 18,
+  trailColor: "#66666757",
+};
+
+const renderTimer = (dimension, time) => {
+  return (
+    <div className="timer">
+      <div className="text-3xl font-medium">Session Name</div>
+      <div>{time}</div>
+      <div>{dimension}</div>
+    </div>
+  );
+};
+
+function Timer() {
+  const formatTime = remainingTime => {
+    const minutes = Math.floor(remainingTime / 60);
+    const seconds = remainingTime % 60;
+
+    const formattedSeconds = String(seconds).padStart(2, "0");
+    const formattedMinutes = String(minutes).padStart(2, "0");
+    return `${formattedMinutes}:${formattedSeconds}`;
+  };
+
+  return (
+    <div>
+      <div className="timer-wrapper">
+        <CountdownCircleTimer
+          {...timerProps}
+          colors="#E1E1E1"
+          duration={300}
+          onComplete={{
+            shouldRepeat: true,
+          }}
+        >
+          {({ remainingTime, color }) => (
+            <span style={{ color }}>
+              {renderTimer(formatTime(remainingTime))}
+            </span>
+          )}
+        </CountdownCircleTimer>
+        <div className="btns">
+          <Button className="DEFAULT bg-opacity-40 shadow-lg p-3 m-3">
+            <div className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
+              Start
+            </div>
+          </Button>
+          <Button className="DEFAULT bg-opacity-40 shadow-lg p-3 m-3">
+            <div className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
+              Stop
+            </div>
+          </Button>
+          <Button className="DEFAULT bg-opacity-40 shadow-lg p-3 m-3">
+            <div className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
+              Reset
+            </div>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default Timer;
