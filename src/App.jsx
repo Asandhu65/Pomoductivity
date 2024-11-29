@@ -2,6 +2,7 @@ import "./output.css";
 import "./index.css";
 import { Button } from "./components/ui/button.jsx";
 import Timer from "./components/Timer.jsx";
+import Menu from "./components/Menu.jsx";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           </div>
         </Button>
       </div>
+      <Menu />
       <Timer />
     </div>
   );
