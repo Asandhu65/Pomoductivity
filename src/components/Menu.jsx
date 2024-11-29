@@ -1,6 +1,6 @@
 function Menu() {
   return (
-    <div className="bg-grey bg-opacity-50 shadow-lg text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] w-auto">
+    <div className="bg-grey bg-opacity-50 shadow-lg text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] w-auto mt-5 flex justify-end">
       <form action="">
         <input type="checkbox" />
         <label htmlFor="">Popular</label>
