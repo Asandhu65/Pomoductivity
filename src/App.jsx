@@ -4,6 +4,7 @@ import { Button } from "./components/ui/button.jsx";
 import { useState } from "react";
 import Timer from "./components/Timer.jsx";
 import Menu from "./components/Menu.jsx";
+import Todolist from "./components/Todolist.jsx";
 
 function App() {
   const [showMenu, setShowMenu] = useState(false);
@@ -26,6 +27,7 @@ function App() {
         </Button>
       </div>
       {showMenu && <Menu />}
+      <Todolist />
       <Timer />
     </div>
   );
