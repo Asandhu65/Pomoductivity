@@ -8,11 +8,15 @@ import Todolist from "./components/Todolist.jsx";
 
 function App() {
   const [showMenu, setShowMenu] = useState(false);
+  const [showList, setShowList] = useState(false);
 
   return (
     <div>
       <div className="flex justify-between p-4">
-        <Button className="grey bg-opacity-20 shadow-lg p-2">
+        <Button
+          onClick={() => setShowList(!showList)}
+          className="grey bg-opacity-20 shadow-lg p-2"
+        >
           <div className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
             To-Do List
           </div>
@@ -26,9 +30,15 @@ function App() {
           </div>
         </Button>
       </div>
-      {showMenu && <Menu />}
-      <Todolist />
-      <Timer />
+      <div className={showMenu ? "" : "hidden"}>
+        <Menu />
+      </div>
+      <div className={showList ? "" : "hidden"}>
+        <Todolist />
+      </div>
+      <div>
+        <Timer />
+      </div>
     </div>
   );
 }
