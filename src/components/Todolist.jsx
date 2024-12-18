@@ -1,8 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function Todolist() {
-  const [toDos, setToDos] = useState([]);
+  const [toDos, setToDos] = useState(() => {
+    const savedToDos = localStorage.getItem("todos");
+    return savedToDos ? JSON.parse(savedToDos) : [];
+  });
   const [input, setInput] = useState("");
+
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(toDos));
+  }, [toDos]);
 
   const addTask = () => {
     if (input.trim() !== "") {
@@ -15,6 +22,7 @@ function Todolist() {
   const deleteTask = taskToDelete => {
     setToDos(toDos.filter(task => task !== taskToDelete));
   };
+
   return (
     <div className="relative">
       <div className="bg-grey bg-opacity-20 shadow-lg text-black w-64 mb-3 rounded-md absolute left-1">
