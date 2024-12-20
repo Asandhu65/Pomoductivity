@@ -18,15 +18,6 @@ body {
   backdrop-filter: blur(8px);
 }
 
-.timer-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  gap: 10px;
-  padding-top: 20px;
-}
-
 .timer {
   display: flex;
   flex-direction: column;

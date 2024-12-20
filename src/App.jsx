@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import Timer from "./components/Timer.jsx";
 import Menu from "./components/Menu.jsx";
 import Todolist from "./components/Todolist.jsx";
-import { CountdownCircleTimer } from "react-countdown-circle-timer";
 
 function App() {
   const [showList, setShowList] = useState(() => {
@@ -18,7 +17,22 @@ function App() {
     return savedState ? JSON.parse(savedState) : false;
   });
 
-  const [timeInSeconds, setTimeInSeconds] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [key, setKey] = useState(0);
+
+  const handleTimeSet = seconds => {
+    setDuration(seconds);
+    setIsPlaying(false);
+    setKey(prev => prev + 1);
+  };
+
+  const handleStart = () => setIsPlaying(true);
+  const handlePause = () => setIsPlaying(false);
+  const handleReset = () => {
+    setIsPlaying(false);
+    setKey(prev => prev + 1);
+  };
 
   useEffect(() => {
     localStorage.setItem("componentVisibilityMenu", JSON.stringify(showMenu));
@@ -29,7 +43,7 @@ function App() {
   }, [showList]);
 
   return (
-    <div>
+    <>
       <div className="flex justify-between p-4">
         <Button
           onClick={() => setShowList(!showList)}
@@ -49,18 +63,46 @@ function App() {
         </Button>
       </div>
       <div className={showMenu ? "" : "hidden"}>
-        <Menu onTimeSet={setTimeInSeconds} />
-        {timeInSeconds > 0 && (
-          <CountdownCircleTimer date={Date.now() + timeInSeconds * 1000} />
-        )}
+        <Menu onTimeSet={handleTimeSet} />
       </div>
+      {duration > 0 && (
+        <>
+          <Timer
+            duration={duration}
+            isPlaying={isPlaying}
+            key={key}
+            onComplete={() => setIsPlaying(false)}
+          />
+
+          <div className="btns">
+            <Button
+              className="bg-grey bg-opacity-30 shadow-lg p-3 m-3 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]"
+              onClick={handleStart}
+              disabled={isPlaying}
+            >
+              Start
+            </Button>
+            <Button
+              className="bg-grey bg-opacity-30 shadow-lg p-3 m-3 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]"
+              onClick={handlePause}
+              disabled={!isPlaying}
+            >
+              Stop
+            </Button>
+            <Button
+              className="bg-grey bg-opacity-30 shadow-lg p-3 m-3 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]"
+              onClick={handleReset}
+            >
+              Reset
+            </Button>
+          </div>
+        </>
+      )}
+
       <div className={showList ? "" : "hidden"}>
         <Todolist />
       </div>
-      <div>
-        <Timer />
-      </div>
-    </div>
+    </>
   );
 }
 

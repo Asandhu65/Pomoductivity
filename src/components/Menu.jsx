@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+// eslint-disable-next-line react/prop-types
 function Menu({ onTimeSet }) {
   const [timerOptions, setTimerOptions] = useState(() => {
     const saved = localStorage.getItem("timerOptions");
