@@ -18,20 +18,27 @@ function App() {
   });
 
   const [duration, setDuration] = useState(0);
+  const [inititalDuration, setInititalDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [key, setKey] = useState(0);
+  const [timerKey, setTimerKey] = useState(0);
 
   const handleTimeSet = seconds => {
     setDuration(seconds);
+    setInititalDuration(seconds);
     setIsPlaying(false);
-    setKey(prev => prev + 1);
+    setTimerKey(prev => prev + 1);
+    console.log("Timer set to:", seconds); // Debug log
   };
 
   const handleStart = () => setIsPlaying(true);
+
   const handlePause = () => setIsPlaying(false);
+
   const handleReset = () => {
     setIsPlaying(false);
-    setKey(prev => prev + 1);
+    setDuration(inititalDuration);
+    setTimerKey(prev => prev + 1);
+    console.log("Timer reset to:", inititalDuration); // Debug log
   };
 
   useEffect(() => {
@@ -53,6 +60,7 @@ function App() {
             To-Do List
           </div>
         </Button>
+
         <Button
           onClick={() => setShowMenu(!showMenu)}
           className="grey bg-opacity-20 shadow-lg p-2 justify-end"
@@ -65,40 +73,39 @@ function App() {
       <div className={showMenu ? "" : "hidden"}>
         <Menu onTimeSet={handleTimeSet} />
       </div>
-      {duration > 0 && (
-        <>
-          <Timer
-            duration={duration}
-            isPlaying={isPlaying}
-            key={key}
-            onComplete={() => setIsPlaying(false)}
-          />
+      {/* {duration > 0 && ( */}
+      <>
+        <Timer
+          duration={duration}
+          isPlaying={isPlaying}
+          timerKey={timerKey}
+          onComplete={() => setIsPlaying(false)}
+        />
 
-          <div className="btns">
-            <Button
-              className="bg-grey bg-opacity-30 shadow-lg p-3 m-3 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]"
-              onClick={handleStart}
-              disabled={isPlaying}
-            >
-              Start
-            </Button>
-            <Button
-              className="bg-grey bg-opacity-30 shadow-lg p-3 m-3 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]"
-              onClick={handlePause}
-              disabled={!isPlaying}
-            >
-              Stop
-            </Button>
-            <Button
-              className="bg-grey bg-opacity-30 shadow-lg p-3 m-3 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]"
-              onClick={handleReset}
-            >
-              Reset
-            </Button>
-          </div>
-        </>
-      )}
-
+        <div className="btns">
+          <Button
+            className="bg-grey bg-opacity-30 shadow-lg p-3 m-3 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]"
+            onClick={handleStart}
+            disabled={isPlaying}
+          >
+            Start
+          </Button>
+          <Button
+            className="bg-grey bg-opacity-30 shadow-lg p-3 m-3 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]"
+            onClick={handlePause}
+            disabled={!isPlaying}
+          >
+            Pause
+          </Button>
+          <Button
+            className="bg-grey bg-opacity-30 shadow-lg p-3 m-3 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]"
+            onClick={handleReset}
+          >
+            Reset
+          </Button>
+        </div>
+      </>
+      {/* )} */}
       <div className={showList ? "" : "hidden"}>
         <Todolist />
       </div>

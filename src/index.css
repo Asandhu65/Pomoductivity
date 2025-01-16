@@ -16,6 +16,8 @@ body {
   height: 100vh;
   width: auto;
   backdrop-filter: blur(8px);
+  margin: 0;
+  padding: 0;
 }
 
 .timer {
@@ -25,7 +27,6 @@ body {
   font-size: 96px;
   font-weight: bold;
   text-shadow: 4px 4px 4px rgba(0, 0, 0, 0.586);
-  color: #e1e1e1;
 }
 
 svg {
