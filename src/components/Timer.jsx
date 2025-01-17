@@ -2,6 +2,13 @@ import { CountdownCircleTimer } from "react-countdown-circle-timer";
 
 // eslint-disable-next-line react/prop-types
 function Timer({ duration, isPlaying, timerKey }) {
+  const playSound = () => {
+    const audio = new Audio(
+      "src/assets/alarm-clock-ringing-fascinatedsound-1-00-03.mp3"
+    );
+    audio.play();
+  };
+
   const renderTime = ({ remainingTime }) => {
     const minutes = Math.floor(remainingTime / 60);
     const seconds = remainingTime % 60;
@@ -12,7 +19,7 @@ function Timer({ duration, isPlaying, timerKey }) {
           {minutes}:{seconds < 10 ? `0${seconds}` : seconds}
         </div>
         <div className="text-md text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
-          {remainingTime === 0 ? "Times up!" : ""}
+          {remainingTime === 0 ? "Time for a break!" : "Focus"}
         </div>
       </div>
     );
@@ -40,6 +47,10 @@ function Timer({ duration, isPlaying, timerKey }) {
           size={600}
           strokeWidth={18}
           isSmoothColorTransition
+          onComplete={() => {
+            playSound();
+            return { shouldRepeat: false };
+          }}
         >
           {renderTime}
         </CountdownCircleTimer>
