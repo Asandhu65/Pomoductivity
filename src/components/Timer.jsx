@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 
 // eslint-disable-next-line react/prop-types
 function Timer({ duration, isPlaying, timerKey }) {
+  const [remainingTime, setRemainingTime] = useState(duration);
   const playSound = () => {
     const audio = new Audio(
       "src/assets/alarm-clock-ringing-fascinatedsound-1-00-03.mp3"
@@ -25,6 +27,39 @@ function Timer({ duration, isPlaying, timerKey }) {
     );
   };
 
+  useEffect(() => {
+    const updateTitle = () => {
+      const minutes = Math.floor(remainingTime / 60);
+      const seconds = remainingTime % 60;
+      document.title = remainingTime
+        ? `${minutes}:${seconds < 10 ? `0${seconds}` : seconds} - Focus Timer`
+        : "Times up! - Focus Timer";
+    };
+
+    updateTitle();
+  }, [remainingTime]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setRemainingTime(prevTime => {
+        if (isPlaying && prevTime > 0) {
+          return prevTime - 1;
+        } else {
+          clearInterval(intervalId);
+          return prevTime;
+        }
+      });
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [isPlaying, duration]);
+
+  useEffect(() => {
+    return () => {
+      document.title = "Pomoductivity";
+    };
+  }, []);
+
   return (
     <>
       <div className="flex justify-center">
@@ -47,6 +82,7 @@ function Timer({ duration, isPlaying, timerKey }) {
           size={600}
           strokeWidth={18}
           isSmoothColorTransition
+          onUpdate={time => setRemainingTime(time)}
           onComplete={() => {
             playSound();
             return { shouldRepeat: false };
