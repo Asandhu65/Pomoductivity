@@ -17,7 +17,10 @@ function App() {
     return savedState ? JSON.parse(savedState) : false;
   });
 
-  const [duration, setDuration] = useState(0);
+  const [duration, setDuration] = useState(() => {
+    const savedDuration = localStorage.getItem("selectedDuration");
+    return savedDuration ? parseInt(savedDuration, 10) : 1500;
+  });
   const [inititalDuration, setInititalDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [timerKey, setTimerKey] = useState(0);
@@ -27,7 +30,7 @@ function App() {
     setInititalDuration(seconds);
     setIsPlaying(false);
     setTimerKey(prev => prev + 1);
-    console.log("Timer set to:", seconds); // Debug log
+    localStorage.setItem("selectedDuration", seconds);
   };
 
   const handleStart = () => setIsPlaying(true);
@@ -38,7 +41,6 @@ function App() {
     setIsPlaying(false);
     setDuration(inititalDuration);
     setTimerKey(prev => prev + 1);
-    console.log("Timer reset to:", inititalDuration); // Debug log
   };
 
   useEffect(() => {
@@ -48,6 +50,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem("componentVisibilityList", JSON.stringify(showList));
   }, [showList]);
+
+  useEffect(() => {
+    localStorage.setItem("selectedDuration", duration);
+  }, [duration]);
 
   return (
     <>
@@ -73,7 +79,7 @@ function App() {
       <div className={showMenu ? "" : "hidden"}>
         <Menu onTimeSet={handleTimeSet} />
       </div>
-      {/* {duration > 0 && ( */}
+
       <>
         <Timer
           duration={duration}

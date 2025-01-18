@@ -22,7 +22,7 @@ function Menu({ onTimeSet }) {
       setTimerOptions({
         defaultTimer: !timerOptions.defaultTimer,
         customTimer: false,
-        customMinutes: timerOptions.customMinutes,
+        customMinutes: "",
       });
 
       if (!timerOptions.defaultTimer) {
@@ -34,6 +34,10 @@ function Menu({ onTimeSet }) {
         customTimer: !timerOptions.customTimer,
         customMinutes: timerOptions.customMinutes,
       });
+
+      if (timerOptions.customTimer && timerOptions.customMinutes) {
+        onTimeSet(parseInt(timerOptions.customMinutes) * 60);
+      }
     }
   };
 

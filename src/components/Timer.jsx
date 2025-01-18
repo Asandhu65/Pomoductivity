@@ -4,6 +4,11 @@ import { CountdownCircleTimer } from "react-countdown-circle-timer";
 // eslint-disable-next-line react/prop-types
 function Timer({ duration, isPlaying, timerKey }) {
   const [remainingTime, setRemainingTime] = useState(duration);
+  const [pomoCompletionCount, setPomoCompletionCount] = useState(() => {
+    const savedCount = localStorage.getItem("pomoCompletionCount");
+    return savedCount ? parseInt(savedCount, 10) : 0;
+  });
+
   const playSound = () => {
     const audio = new Audio(
       "src/assets/alarm-clock-ringing-fascinatedsound-1-00-03.mp3"
@@ -40,6 +45,10 @@ function Timer({ duration, isPlaying, timerKey }) {
   }, [remainingTime]);
 
   useEffect(() => {
+    setRemainingTime(duration);
+  }, [duration]);
+
+  useEffect(() => {
     const intervalId = setInterval(() => {
       setRemainingTime(prevTime => {
         if (isPlaying && prevTime > 0) {
@@ -60,11 +69,19 @@ function Timer({ duration, isPlaying, timerKey }) {
     };
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem("pomoCompletionCount", pomoCompletionCount);
+  }, [pomoCompletionCount]);
+
+  useEffect(() => {
+    localStorage.setItem("selectedDuration", duration);
+  }, [duration]);
+
   return (
     <>
       <div className="flex justify-center">
         <p className="text-xl text-white font-medium [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-grey bg-opacity-30  rounded-tl-md rounded-bl-md w-56 m-0 p-2 flex justify-center">
-          0 Pomodoro&apos;s
+          {pomoCompletionCount} Pomodoro&apos;s
         </p>
         <p className="text-xl text-white font-medium [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-grey bg-opacity-30  w-56 m-0 p-2 flex justify-center ">
           0 Breaks
@@ -85,6 +102,7 @@ function Timer({ duration, isPlaying, timerKey }) {
           onUpdate={time => setRemainingTime(time)}
           onComplete={() => {
             playSound();
+            setPomoCompletionCount(prev => prev + 1);
             return { shouldRepeat: false };
           }}
         >
