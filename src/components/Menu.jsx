@@ -50,9 +50,9 @@ function Menu({ onTimeSet }) {
   };
 
   return (
-    <div className="relative">
-      <div className="absolute right-1">
-        <div className="bg-grey bg-opacity-50 shadow-lg text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] rounded-md p-3">
+    <div className="relative ">
+      <div className="absolute right-1  mr-1 w-[200px]">
+        <div className="bg-grey bg-opacity-50 shadow-lg text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] rounded-md p-3 ">
           <form>
             <input
               type="checkbox"
@@ -76,23 +76,34 @@ function Menu({ onTimeSet }) {
             {timerOptions.customTimer && (
               <input
                 name="pomodoro"
-                className="text-black"
+                className="text-black rounded m-1 w-1/4"
                 type="number"
                 min="1"
                 value={timerOptions.customMinutes}
                 onChange={e => handleCustomTimeChange(e.target.value)}
               />
             )}
-            {/* <br />
-            <label htmlFor="short_break">Short Break</label>
-            <input className="text-black" type="number" name="short_break" />
             <br />
-            <label htmlFor="long_break">Long Break</label>
-            <input className="text-black" type="number" name="long_break" /> */}
+            <label htmlFor="pomodoro">Short Break</label>
+            {timerOptions.customTimer && (
+              <input
+                name="short break"
+                className="text-black rounded m-1 w-1/4"
+                type="number"
+                min="1"
+              />
+            )}
+            <br />
+            <label htmlFor="pomodoro">Long Break</label>
+            {timerOptions.customTimer && (
+              <input
+                name="long break"
+                className="text-black rounded m-1 w-1/4"
+                type="number"
+                min="1"
+              />
+            )}
           </form>
-          {/* <button className="ml-24 mt-5 bg-grey bg-opacity-70 shadow-lg p-2 rounded-md [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
-            Set Timer
-          </button> */}
         </div>
       </div>
     </div>

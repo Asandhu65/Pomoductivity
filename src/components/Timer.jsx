@@ -32,8 +32,8 @@ function Timer({ duration, isPlaying, timerKey }) {
       const minutes = Math.floor(remainingTime / 60);
       const seconds = remainingTime % 60;
       document.title = remainingTime
-        ? `${minutes}:${seconds < 10 ? `0${seconds}` : seconds} - Focus Timer`
-        : "Times up! - Focus Timer";
+        ? `${minutes}:${seconds < 10 ? `0${seconds}` : seconds} - Focus`
+        : "Break Time! - Pomoductivity";
     };
 
     updateTitle();
