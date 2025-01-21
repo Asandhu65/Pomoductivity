@@ -2,12 +2,34 @@ import { useEffect, useState } from "react";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 
 // eslint-disable-next-line react/prop-types
-function Timer({ duration, isPlaying, timerKey }) {
+function Timer({ isPlaying, timerKey }) {
+  const [phase, setPhase] = useState("pomodoro");
+  const [duration, setDuration] = useState(() => {
+    const savedPhase = localStorage.getItem("currentPhase");
+    if (savedPhase) {
+      return JSON.parse(localStorage.getItem("currentDurations"))[savedPhase];
+    }
+    return 1500;
+  });
   const [remainingTime, setRemainingTime] = useState(duration);
-  const [pomoCompletionCount, setPomoCompletionCount] = useState(() => {
-    const savedCount = localStorage.getItem("pomoCompletionCount");
+  const [pomoCount, setPomoCount] = useState(() => {
+    const savedCount = localStorage.getItem("pomoCount");
     return savedCount ? parseInt(savedCount, 10) : 0;
   });
+  const [shortBreakCount, setShortBreakCount] = useState(() => {
+    const savedCount = localStorage.getItem("shortBreakCount");
+    return savedCount ? parseInt(savedCount, 10) : 0;
+  });
+  const [longBreakCount, setLongBreakCount] = useState(() => {
+    const savedCount = localStorage.getItem("longBreakCount");
+    return savedCount ? parseInt(savedCount, 10) : 0;
+  });
+
+  const durations = {
+    pomodoro: 25 * 60,
+    shortBreak: 5 * 60,
+    longBreak: 15 * 60,
+  };
 
   const playSound = () => {
     const audio = new Audio(
@@ -16,37 +38,46 @@ function Timer({ duration, isPlaying, timerKey }) {
     audio.play();
   };
 
-  const renderTime = ({ remainingTime }) => {
-    const minutes = Math.floor(remainingTime / 60);
-    const seconds = remainingTime % 60;
+  const handleCompletion = () => {
+    playSound();
 
-    return (
-      <div className="flex flex-col items-center">
-        <div className="text-6xl text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
-          {minutes}:{seconds < 10 ? `0${seconds}` : seconds}
-        </div>
-        <div className="text-md text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
-          {remainingTime === 0 ? "Time for a break!" : "Focus"}
-        </div>
-      </div>
-    );
+    if (phase === "pomodoro") {
+      setPomoCount(prev => prev + 1);
+      localStorage.setItem("pomoCount", pomoCount + 1);
+
+      if ((pomoCount + 1) % 4 === 0) {
+        setPhase("longBreak");
+        setLongBreakCount(prev => prev + 1);
+        localStorage.setItem("longBreakCount", longBreakCount + 1);
+        setRemainingTime(durations.longBreak);
+      } else {
+        setPhase("shortBreak");
+        setShortBreakCount(prev => prev + 1);
+        localStorage.setItem("shortBreakCount", shortBreakCount + 1);
+        setRemainingTime(durations.shortBreak);
+      }
+    } else if (phase === "shortBreak" || phase === "longBreak") {
+      setPhase("pomodoro");
+      setRemainingTime(durations.pomodoro);
+    }
+  };
+
+  const handleResetCounters = () => {
+    setPomoCount(0);
+    setShortBreakCount(0);
+    setLongBreakCount(0);
+
+    localStorage.removeItem("pomoCount");
+    localStorage.removeItem("shortBreakCount");
+    localStorage.removeItem("longBreakCount");
   };
 
   useEffect(() => {
-    const updateTitle = () => {
-      const minutes = Math.floor(remainingTime / 60);
-      const seconds = remainingTime % 60;
-      document.title = remainingTime
-        ? `${minutes}:${seconds < 10 ? `0${seconds}` : seconds} - Focus`
-        : "Break Time! - Pomoductivity";
-    };
-
-    updateTitle();
-  }, [remainingTime]);
-
-  useEffect(() => {
-    setRemainingTime(duration);
-  }, [duration]);
+    setDuration(durations[phase]);
+    setRemainingTime(durations[phase]);
+    localStorage.setItem("currentPhase", phase);
+    localStorage.setItem("currentDurations", JSON.stringify(durations));
+  }, [phase]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -64,35 +95,41 @@ function Timer({ duration, isPlaying, timerKey }) {
   }, [isPlaying, duration]);
 
   useEffect(() => {
-    return () => {
-      document.title = "Pomoductivity";
-    };
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("pomoCompletionCount", pomoCompletionCount);
-  }, [pomoCompletionCount]);
-
-  useEffect(() => {
-    localStorage.setItem("selectedDuration", duration);
-  }, [duration]);
+    document.title = `${Math.floor(remainingTime / 60)}:${
+      remainingTime % 60 < 10 ? `0${remainingTime % 60}` : remainingTime % 60
+    } - ${
+      phase === "pomodoro"
+        ? "Focus"
+        : phase === "shortBreak"
+        ? "Short Break"
+        : "Long Break"
+    }`;
+  }, [remainingTime, phase]);
 
   return (
     <>
-      <div className="flex justify-center">
-        <p className="text-xl text-white font-medium [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-grey bg-opacity-30  rounded-tl-md rounded-bl-md w-56 m-0 p-2 flex justify-center">
-          {pomoCompletionCount} Pomodoro&apos;s
+      <div className="flex justify-center items-center gap-4 mb-4">
+        <p className="text-xl text-white font-medium bg-grey bg-opacity-30 rounded-md w-56 p-2 flex justify-center">
+          Pomodoro: {pomoCount}
         </p>
-        <p className="text-xl text-white font-medium [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-grey bg-opacity-30  w-56 m-0 p-2 flex justify-center ">
-          0 Breaks
+        <p className="text-xl text-white font-medium bg-grey bg-opacity-30 rounded-md w-56 p-2 flex justify-center">
+          Short Break: {shortBreakCount}
         </p>
-        <p className="text-xl text-white font-medium [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-grey bg-opacity-30  rounded-tr-md rounded-br-md w-56 m-0 p-2 flex justify-center">
-          0 Long Breaks
-        </p>
+        <div className="flex items-center gap-2">
+          <p className="text-xl text-white font-medium bg-grey bg-opacity-30 rounded-md w-56 p-2 flex justify-center">
+            Long Break: {longBreakCount}
+          </p>
+          <button
+            onClick={handleResetCounters}
+            className="bg-red-500 text-white text-sm px-4 py-2 rounded-md hover:bg-red-600"
+          >
+            Reset
+          </button>
+        </div>
       </div>
       <div className="flex flex-col items-center justify-center gap-2 pt-5">
         <CountdownCircleTimer
-          key={timerKey}
+          key={timerKey + phase}
           isPlaying={isPlaying}
           duration={duration}
           colors={"#66666757"}
@@ -101,12 +138,27 @@ function Timer({ duration, isPlaying, timerKey }) {
           isSmoothColorTransition
           onUpdate={time => setRemainingTime(time)}
           onComplete={() => {
-            playSound();
-            setPomoCompletionCount(prev => prev + 1);
+            handleCompletion();
             return { shouldRepeat: false };
           }}
         >
-          {renderTime}
+          {({ remainingTime }) => (
+            <div className="flex flex-col items-center">
+              <div className="text-6xl text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
+                {Math.floor(remainingTime / 60)}:
+                {remainingTime % 60 < 10
+                  ? `0${remainingTime % 60}`
+                  : remainingTime % 60}
+              </div>
+              <div className="text-md text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
+                {phase === "pomodoro"
+                  ? "Focus"
+                  : phase === "shortBreak"
+                  ? "Short Break"
+                  : "Long Break"}
+              </div>
+            </div>
+          )}
         </CountdownCircleTimer>
       </div>
     </>
