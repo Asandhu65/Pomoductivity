@@ -1,7 +1,7 @@
 import "./output.css";
 import "./index.css";
 import { Button } from "./components/ui/button.jsx";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Timer from "./components/Timer.jsx";
 import Menu from "./components/Menu.jsx";
 import Todolist from "./components/Todolist.jsx";
@@ -17,29 +17,32 @@ function App() {
     return savedState ? JSON.parse(savedState) : false;
   });
 
-  const [duration, setDuration] = useState(() => {
-    const savedDuration = localStorage.getItem("selectedDuration");
-    return savedDuration ? parseInt(savedDuration, 10) : 1500;
+  const [customDurations, setCustomDurations] = useState({
+    pomodoro: 1500,
+    shortBreak: 300,
+    longBreak: 900,
   });
-  const [inititalDuration, setInititalDuration] = useState(0);
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [timerKey, setTimerKey] = useState(0);
 
-  const handleTimeSet = seconds => {
-    setDuration(seconds);
-    setInititalDuration(seconds);
+  const handleTimeSet = useCallback(newDurations => {
+    const { pomodoro, shortBreak, longBreak } = newDurations;
+    setCustomDurations({
+      pomodoro: pomodoro || 1500,
+      shortBreak: shortBreak || 300,
+      longBreak: longBreak || 900,
+    });
+
     setIsPlaying(false);
     setTimerKey(prev => prev + 1);
-    localStorage.setItem("selectedDuration", seconds);
-  };
+  }, []);
 
   const handleStart = () => setIsPlaying(true);
-
   const handlePause = () => setIsPlaying(false);
 
   const handleReset = () => {
     setIsPlaying(false);
-    setDuration(inititalDuration);
     setTimerKey(prev => prev + 1);
   };
 
@@ -50,10 +53,6 @@ function App() {
   useEffect(() => {
     localStorage.setItem("componentVisibilityList", JSON.stringify(showList));
   }, [showList]);
-
-  useEffect(() => {
-    localStorage.setItem("selectedDuration", duration);
-  }, [duration]);
 
   return (
     <>
@@ -76,45 +75,38 @@ function App() {
           </div>
         </Button>
       </div>
-      <div className={showMenu ? "" : "hidden"}>
-        <Menu onTimeSet={handleTimeSet} />
-      </div>
 
-      <>
-        <Timer
-          duration={duration}
-          isPlaying={isPlaying}
-          timerKey={timerKey}
-          onComplete={() => setIsPlaying(false)}
-        />
+      {showMenu && <Menu onTimeSet={handleTimeSet} />}
+      <Timer
+        customDurations={customDurations}
+        isPlaying={isPlaying}
+        timerKey={timerKey}
+        onComplete={() => setIsPlaying(false)}
+      />
 
-        <div className="btns">
-          <Button
-            className="bg-grey bg-opacity-30 shadow-lg p-3 m-3 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]"
-            onClick={handleStart}
-            disabled={isPlaying}
-          >
-            Start
-          </Button>
-          <Button
-            className="bg-grey bg-opacity-30 shadow-lg p-3 m-3 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]"
-            onClick={handlePause}
-            disabled={!isPlaying}
-          >
-            Pause
-          </Button>
-          <Button
-            className="bg-grey bg-opacity-30 shadow-lg p-3 m-3 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]"
-            onClick={handleReset}
-          >
-            Reset
-          </Button>
-        </div>
-      </>
-      {/* )} */}
-      <div className={showList ? "" : "hidden"}>
-        <Todolist />
+      <div className="btns">
+        <Button
+          className="bg-grey bg-opacity-30 shadow-lg p-3 m-3 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]"
+          onClick={handleStart}
+          disabled={isPlaying}
+        >
+          Start
+        </Button>
+        <Button
+          className="bg-grey bg-opacity-30 shadow-lg p-3 m-3 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]"
+          onClick={handlePause}
+          disabled={!isPlaying}
+        >
+          Pause
+        </Button>
+        <Button
+          className="bg-grey bg-opacity-30 shadow-lg p-3 m-3 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]"
+          onClick={handleReset}
+        >
+          Reset
+        </Button>
       </div>
+      {showList && <Todolist />}
     </>
   );
 }

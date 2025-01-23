@@ -1,16 +1,14 @@
-import { useEffect, useState } from "react";
+/* eslint-disable react/prop-types */
+import { useEffect, useState, useMemo, useRef } from "react";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 
-// eslint-disable-next-line react/prop-types
-function Timer({ isPlaying, timerKey }) {
+function Timer({
+  isPlaying,
+  timerKey,
+  customDurations = { pomodoro: 1500, shortBreak: 300, longBreak: 900 },
+}) {
   const [phase, setPhase] = useState("pomodoro");
-  const [duration, setDuration] = useState(() => {
-    const savedPhase = localStorage.getItem("currentPhase");
-    if (savedPhase) {
-      return JSON.parse(localStorage.getItem("currentDurations"))[savedPhase];
-    }
-    return 1500;
-  });
+  const [duration, setDuration] = useState(customDurations.pomodoro);
   const [remainingTime, setRemainingTime] = useState(duration);
   const [pomoCount, setPomoCount] = useState(() => {
     const savedCount = localStorage.getItem("pomoCount");
@@ -25,11 +23,24 @@ function Timer({ isPlaying, timerKey }) {
     return savedCount ? parseInt(savedCount, 10) : 0;
   });
 
-  const durations = {
-    pomodoro: 25 * 60,
-    shortBreak: 5 * 60,
-    longBreak: 15 * 60,
-  };
+  const durations = useMemo(
+    () => ({
+      pomodoro: customDurations.pomodoro || 1500,
+      shortBreak: customDurations.shortBreak || 300,
+      longBreak: customDurations.longBreak || 900,
+    }),
+    [customDurations]
+  );
+
+  const remainingTimeRef = useRef(remainingTime);
+
+  useEffect(() => {
+    const updatedDuration = durations[phase];
+    if (updatedDuration) {
+      setDuration(updatedDuration);
+      setRemainingTime(updatedDuration);
+    }
+  }, [phase, durations]);
 
   const playSound = () => {
     const audio = new Audio(
@@ -42,23 +53,29 @@ function Timer({ isPlaying, timerKey }) {
     playSound();
 
     if (phase === "pomodoro") {
-      setPomoCount(prev => prev + 1);
-      localStorage.setItem("pomoCount", pomoCount + 1);
+      setPomoCount(prev => {
+        const newCount = prev + 1;
+        localStorage.setItem("pomoCount", newCount);
+        return newCount;
+      });
 
       if ((pomoCount + 1) % 4 === 0) {
         setPhase("longBreak");
-        setLongBreakCount(prev => prev + 1);
-        localStorage.setItem("longBreakCount", longBreakCount + 1);
-        setRemainingTime(durations.longBreak);
+        setLongBreakCount(prev => {
+          const newCount = prev + 1;
+          localStorage.setItem("longBreakCount", newCount);
+          return newCount;
+        });
       } else {
         setPhase("shortBreak");
-        setShortBreakCount(prev => prev + 1);
-        localStorage.setItem("shortBreakCount", shortBreakCount + 1);
-        setRemainingTime(durations.shortBreak);
+        setShortBreakCount(prev => {
+          const newCount = prev + 1;
+          localStorage.setItem("shortBreakCount", newCount);
+          return newCount;
+        });
       }
-    } else if (phase === "shortBreak" || phase === "longBreak") {
+    } else {
       setPhase("pomodoro");
-      setRemainingTime(durations.pomodoro);
     }
   };
 
@@ -66,45 +83,57 @@ function Timer({ isPlaying, timerKey }) {
     setPomoCount(0);
     setShortBreakCount(0);
     setLongBreakCount(0);
-
     localStorage.removeItem("pomoCount");
     localStorage.removeItem("shortBreakCount");
     localStorage.removeItem("longBreakCount");
   };
 
-  useEffect(() => {
-    setDuration(durations[phase]);
-    setRemainingTime(durations[phase]);
-    localStorage.setItem("currentPhase", phase);
-    localStorage.setItem("currentDurations", JSON.stringify(durations));
-  }, [phase]);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setRemainingTime(prevTime => {
-        if (isPlaying && prevTime > 0) {
-          return prevTime - 1;
-        } else {
-          clearInterval(intervalId);
-          return prevTime;
-        }
-      });
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [isPlaying, duration]);
-
-  useEffect(() => {
-    document.title = `${Math.floor(remainingTime / 60)}:${
-      remainingTime % 60 < 10 ? `0${remainingTime % 60}` : remainingTime % 60
-    } - ${
+  const updateTitle = time => {
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+    const timeString = `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
+    const phaseLabel =
       phase === "pomodoro"
         ? "Focus"
         : phase === "shortBreak"
         ? "Short Break"
-        : "Long Break"
-    }`;
+        : "Long Break";
+
+    document.title = `${timeString} - ${phaseLabel}`;
+  };
+
+  useEffect(() => {
+    updateTitle(remainingTime);
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        updateTitle(remainingTimeRef.current);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [remainingTime, phase]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      if (isPlaying && remainingTime > 0) {
+        setRemainingTime(prev => {
+          const newRemainingTime = prev - 1;
+          remainingTimeRef.current = newRemainingTime;
+          updateTitle(newRemainingTime);
+          return newRemainingTime;
+        });
+      }
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlaying, remainingTime]);
 
   return (
     <>
@@ -127,16 +156,17 @@ function Timer({ isPlaying, timerKey }) {
           </button>
         </div>
       </div>
+
       <div className="flex flex-col items-center justify-center gap-2 pt-5">
         <CountdownCircleTimer
-          key={timerKey + phase}
+          key={`${timerKey}-${phase}`}
           isPlaying={isPlaying}
           duration={duration}
           colors={"#66666757"}
           size={600}
           strokeWidth={18}
           isSmoothColorTransition
-          onUpdate={time => setRemainingTime(time)}
+          onUpdate={setRemainingTime}
           onComplete={() => {
             handleCompletion();
             return { shouldRepeat: false };
