@@ -6,18 +6,33 @@ function Timer({
   isPlaying,
   timerKey,
   customDurations = { pomodoro: 1500, shortBreak: 300, longBreak: 900 },
+  isCustomSelected,
 }) {
-  const [phase, setPhase] = useState("pomodoro");
-  const [duration, setDuration] = useState(customDurations.pomodoro);
-  const [remainingTime, setRemainingTime] = useState(duration);
+  const [phase, setPhase] = useState(() => {
+    const savedPhase = localStorage.getItem("phase");
+    return savedPhase || "pomodoro";
+  });
+
+  const storedDurations = JSON.parse(localStorage.getItem("customDurations"));
+  const effectiveDurations = storedDurations || customDurations;
+
+  const [remainingTime, setRemainingTime] = useState(() => {
+    const savedRemainingTime = localStorage.getItem("remainingTime");
+    return savedRemainingTime
+      ? parseInt(savedRemainingTime, 10)
+      : effectiveDurations[phase];
+  });
+
   const [pomoCount, setPomoCount] = useState(() => {
     const savedCount = localStorage.getItem("pomoCount");
     return savedCount ? parseInt(savedCount, 10) : 0;
   });
+
   const [shortBreakCount, setShortBreakCount] = useState(() => {
     const savedCount = localStorage.getItem("shortBreakCount");
     return savedCount ? parseInt(savedCount, 10) : 0;
   });
+
   const [longBreakCount, setLongBreakCount] = useState(() => {
     const savedCount = localStorage.getItem("longBreakCount");
     return savedCount ? parseInt(savedCount, 10) : 0;
@@ -25,22 +40,36 @@ function Timer({
 
   const durations = useMemo(
     () => ({
-      pomodoro: customDurations.pomodoro || 1500,
-      shortBreak: customDurations.shortBreak || 300,
-      longBreak: customDurations.longBreak || 900,
+      pomodoro: effectiveDurations.pomodoro || 1500,
+      shortBreak: effectiveDurations.shortBreak || 300,
+      longBreak: effectiveDurations.longBreak || 900,
     }),
-    [customDurations]
+    [effectiveDurations]
   );
 
   const remainingTimeRef = useRef(remainingTime);
 
+  // Save state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("remainingTime", remainingTime);
+    localStorage.setItem("phase", phase);
+  }, [remainingTime, phase]);
+
+  // Reset remainingTime whenever phase or durations change
   useEffect(() => {
     const updatedDuration = durations[phase];
     if (updatedDuration) {
-      setDuration(updatedDuration);
       setRemainingTime(updatedDuration);
     }
   }, [phase, durations]);
+
+  // Update remainingTime when the radio button for custom timer is selected
+  useEffect(() => {
+    if (!isCustomSelected) {
+      setPhase("pomodoro");
+      setRemainingTime(durations.pomodoro);
+    }
+  }, [isCustomSelected, durations]);
 
   const playSound = () => {
     const audio = new Audio(
@@ -66,6 +95,7 @@ function Timer({
           localStorage.setItem("longBreakCount", newCount);
           return newCount;
         });
+        setRemainingTime(durations.longBreak);
       } else {
         setPhase("shortBreak");
         setShortBreakCount(prev => {
@@ -73,9 +103,11 @@ function Timer({
           localStorage.setItem("shortBreakCount", newCount);
           return newCount;
         });
+        setRemainingTime(durations.shortBreak);
       }
     } else {
       setPhase("pomodoro");
+      setRemainingTime(durations.pomodoro);
     }
   };
 
@@ -86,6 +118,9 @@ function Timer({
     localStorage.removeItem("pomoCount");
     localStorage.removeItem("shortBreakCount");
     localStorage.removeItem("longBreakCount");
+
+    // Reset to the default duration based on the current phase
+    setRemainingTime(durations[phase]);
   };
 
   const updateTitle = time => {
@@ -116,23 +151,24 @@ function Timer({
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [remainingTime, phase]);
 
+  // UseEffect to handle play/pause logic
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      if (isPlaying && remainingTime > 0) {
-        setRemainingTime(prev => {
-          const newRemainingTime = prev - 1;
-          remainingTimeRef.current = newRemainingTime;
-          updateTitle(newRemainingTime);
-          return newRemainingTime;
-        });
-      }
-    }, 1000);
+    if (isPlaying) {
+      const intervalId = setInterval(() => {
+        if (remainingTime > 0) {
+          setRemainingTime(prev => {
+            const newRemainingTime = prev - 1;
+            remainingTimeRef.current = newRemainingTime;
+            updateTitle(newRemainingTime);
+            return newRemainingTime;
+          });
+        }
+      }, 1000);
 
-    return () => clearInterval(intervalId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      return () => clearInterval(intervalId);
+    }
   }, [isPlaying, remainingTime]);
 
   return (
@@ -159,14 +195,13 @@ function Timer({
 
       <div className="flex flex-col items-center justify-center gap-2 pt-5">
         <CountdownCircleTimer
-          key={`${timerKey}-${phase}`}
+          key={timerKey} // Ensure the timer resets when the key changes
           isPlaying={isPlaying}
-          duration={duration}
+          duration={remainingTime}
           colors={"#66666757"}
           size={600}
           strokeWidth={18}
           isSmoothColorTransition
-          onUpdate={setRemainingTime}
           onComplete={() => {
             handleCompletion();
             return { shouldRepeat: false };
@@ -193,6 +228,5 @@ function Timer({
       </div>
     </>
   );
-}
-
+} // test
 export default Timer;

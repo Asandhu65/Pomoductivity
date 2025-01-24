@@ -1,86 +1,115 @@
+/* eslint-disable react/prop-types */
 import { useEffect, useState } from "react";
 
-// eslint-disable-next-line react/prop-types
-function Menu({ onTimeSet }) {
+function Menu({ onTimeSet, clearTimer }) {
   const [timerOptions, setTimerOptions] = useState(() => {
     const saved = localStorage.getItem("timerOptions");
     return saved
       ? JSON.parse(saved)
       : {
-          defaultTimer: false,
-          customTimer: false,
+          selectedOption: "defaultTimer",
           customPomodoro: "",
           customShortBreak: "",
           customLongBreak: "",
         };
   });
 
+  const [errorMessage, setErrorMessage] = useState("");
+
   useEffect(() => {
     localStorage.setItem("timerOptions", JSON.stringify(timerOptions));
   }, [timerOptions]);
 
-  const handleCheckboxChange = option => {
+  useEffect(() => {
+    if (
+      timerOptions.selectedOption === "customTimer" &&
+      timerOptions.customPomodoro &&
+      timerOptions.customShortBreak &&
+      timerOptions.customLongBreak
+    ) {
+      const newDurations = {
+        pomodoro: timerOptions.customPomodoro * 60,
+        shortBreak: timerOptions.customShortBreak * 60,
+        longBreak: timerOptions.customLongBreak * 60,
+      };
+
+      onTimeSet(newDurations, "customTimer");
+    }
+  }, [
+    timerOptions.selectedOption,
+    timerOptions.customPomodoro,
+    timerOptions.customShortBreak,
+    timerOptions.customLongBreak,
+    onTimeSet,
+  ]);
+
+  const handleRadioChange = option => {
+    setErrorMessage("");
+
     if (option === "defaultTimer") {
+      const defaultDurations = {
+        pomodoro: 25 * 60, // 25 minutes in seconds
+        shortBreak: 5 * 60, // 5 minutes in seconds
+        longBreak: 15 * 60, // 15 minutes in seconds
+      };
+
       setTimerOptions({
-        defaultTimer: !timerOptions.defaultTimer,
-        customTimer: false,
+        selectedOption: "defaultTimer",
         customPomodoro: "",
         customShortBreak: "",
         customLongBreak: "",
       });
 
-      if (!timerOptions.defaultTimer) {
-        onTimeSet({
-          pomodoro: 25 * 60,
-          shortBreak: 5 * 60,
-          longBreak: 15 * 60,
-        });
-      }
-    } else {
-      const validPomodoro = parseInt(timerOptions.customPomodoro || 0) * 60;
-      const validShortBreak = parseInt(timerOptions.customShortBreak || 0) * 60;
-      const validLongBreak = parseInt(timerOptions.customLongBreak || 0) * 60;
+      // Always pass the type to ensure the timer updates
+      onTimeSet(defaultDurations, "defaultTimer");
+    } else if (option === "customTimer") {
+      clearTimer();
 
-      setTimerOptions({
-        defaultTimer: false,
-        customTimer: !timerOptions.customTimer,
-        customPomodoro: timerOptions.customPomodoro,
-        customShortBreak: timerOptions.customShortBreak,
-        customLongBreak: timerOptions.customLongBreak,
-      });
+      setTimerOptions(prev => ({
+        ...prev,
+        selectedOption: "customTimer",
+      }));
 
-      if (!timerOptions.customTimer) {
-        onTimeSet({
-          pomodoro: validPomodoro || 1500,
-          shortBreak: validShortBreak || 300,
-          longBreak: validLongBreak || 900,
-        });
-      }
+      onTimeSet(
+        {
+          pomodoro: 0,
+          shortBreak: 0,
+          longBreak: 0,
+        },
+        "customTimer"
+      );
     }
   };
 
   const handleCustomTimeChange = (type, value) => {
-    const minutes = Math.max(1, parseInt(value || "0"));
+    const updatedValue = value === "" ? "" : parseInt(value, 10);
+
     setTimerOptions(prev => ({
       ...prev,
-      [type]: value,
+      [type]: updatedValue,
     }));
+  };
 
-    if (timerOptions.customTimer) {
-      onTimeSet({
-        pomodoro:
-          type === "customPomodoro"
-            ? minutes * 60
-            : parseInt(timerOptions.customPomodoro || "0") * 60,
-        shortBreak:
-          type === "customShortBreak"
-            ? minutes * 60
-            : parseInt(timerOptions.customShortBreak || "0") * 60,
-        longBreak:
-          type === "customLongBreak"
-            ? minutes * 60
-            : parseInt(timerOptions.customLongBreak || "0") * 60,
-      });
+  const handleSubmit = e => {
+    e.preventDefault();
+
+    if (timerOptions.selectedOption === "customTimer") {
+      const { customPomodoro, customShortBreak, customLongBreak } =
+        timerOptions;
+
+      if (!customPomodoro || !customShortBreak || !customLongBreak) {
+        setErrorMessage("Please fill out all custom timer fields.");
+        return;
+      }
+
+      const newDurations = {
+        pomodoro: customPomodoro * 60,
+        shortBreak: customShortBreak * 60,
+        longBreak: customLongBreak * 60,
+      };
+
+      onTimeSet(newDurations, "customTimer");
+      setErrorMessage("");
     }
   };
 
@@ -88,26 +117,29 @@ function Menu({ onTimeSet }) {
     <div className="relative">
       <div className="absolute right-1 mr-1 w-[200px]">
         <div className="bg-grey bg-opacity-50 shadow-lg text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] rounded-md p-3">
-          <form>
+          <form onSubmit={handleSubmit}>
             <input
-              type="checkbox"
-              checked={timerOptions.defaultTimer}
-              onChange={() => handleCheckboxChange("defaultTimer")}
+              type="radio"
+              name="timerOption"
+              checked={timerOptions.selectedOption === "defaultTimer"}
+              onChange={() => handleRadioChange("defaultTimer")}
             />
             <label>Popular</label>
             <p>25 min Pomodoro</p>
             <p>5 min Short Break</p>
             <p>15 min Long Break</p>
             <br />
+
             <input
-              type="checkbox"
-              checked={timerOptions.customTimer}
-              onChange={() => handleCheckboxChange("customTimer")}
+              type="radio"
+              name="timerOption"
+              checked={timerOptions.selectedOption === "customTimer"}
+              onChange={() => handleRadioChange("customTimer")}
             />
             <label>Custom Timer</label>
             <br />
             <label>Pomodoro</label>
-            {timerOptions.customTimer && (
+            {timerOptions.selectedOption === "customTimer" && (
               <input
                 name="pomodoro"
                 className="text-black rounded m-1 w-1/4"
@@ -121,13 +153,13 @@ function Menu({ onTimeSet }) {
             )}
             <br />
             <label>Short Break</label>
-            {timerOptions.customTimer && (
+            {timerOptions.selectedOption === "customTimer" && (
               <input
-                name="short break"
+                name="shortBreak"
                 className="text-black rounded m-1 w-1/4"
                 type="number"
                 min="1"
-                value={timerOptions.customShortBreak}
+                value={timerOptions.customShortBreak || ""}
                 onChange={e =>
                   handleCustomTimeChange("customShortBreak", e.target.value)
                 }
@@ -135,17 +167,31 @@ function Menu({ onTimeSet }) {
             )}
             <br />
             <label>Long Break</label>
-            {timerOptions.customTimer && (
+            {timerOptions.selectedOption === "customTimer" && (
               <input
-                name="long break"
+                name="longBreak"
                 className="text-black rounded m-1 w-1/4"
                 type="number"
                 min="1"
-                value={timerOptions.customLongBreak}
+                value={timerOptions.customLongBreak || ""}
                 onChange={e =>
                   handleCustomTimeChange("customLongBreak", e.target.value)
                 }
               />
+            )}
+            <br />
+
+            {errorMessage && (
+              <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+            )}
+
+            {timerOptions.selectedOption === "customTimer" && (
+              <button
+                type="submit"
+                className="bg-blue-500 text-white text-sm px-4 py-2 rounded-md hover:bg-blue-600 mt-2"
+              >
+                Apply
+              </button>
             )}
           </form>
         </div>

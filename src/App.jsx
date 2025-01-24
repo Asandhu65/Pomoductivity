@@ -17,16 +17,24 @@ function App() {
     return savedState ? JSON.parse(savedState) : false;
   });
 
-  const [customDurations, setCustomDurations] = useState({
-    pomodoro: 1500,
-    shortBreak: 300,
-    longBreak: 900,
+  const [customDurations, setCustomDurations] = useState(() => {
+    const savedDurations = localStorage.getItem("customDurations");
+    return savedDurations
+      ? JSON.parse(savedDurations)
+      : {
+          pomodoro: 1500,
+          shortBreak: 300,
+          longBreak: 900,
+        };
   });
+
+  const [timerType, setTimerType] = useState("defaultTimer");
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [timerKey, setTimerKey] = useState(0);
 
-  const handleTimeSet = useCallback(newDurations => {
+  // Set the custom durations in the state when selected
+  const handleTimeSet = useCallback((newDurations, type) => {
     const { pomodoro, shortBreak, longBreak } = newDurations;
     setCustomDurations({
       pomodoro: pomodoro || 1500,
@@ -34,16 +42,26 @@ function App() {
       longBreak: longBreak || 900,
     });
 
+    setTimerType(type || "defaultTimer");
     setIsPlaying(false);
-    setTimerKey(prev => prev + 1);
+    setTimerKey(prev => prev + 1); // Force a re-render of the Timer component
   }, []);
 
+  // Control the timer state
   const handleStart = () => setIsPlaying(true);
   const handlePause = () => setIsPlaying(false);
 
   const handleReset = () => {
     setIsPlaying(false);
     setTimerKey(prev => prev + 1);
+    setCustomDurations(prev => ({ ...prev })); // Keep current custom timer settings on reset
+  };
+
+  // Clear Timer when switching to custom timer
+  const clearTimer = () => {
+    setIsPlaying(false);
+    setCustomDurations({ pomodoro: 0, shortBreak: 0, longBreak: 0 });
+    setTimerKey(prevKey => prevKey + 1); // Force a reset of the timer component
   };
 
   useEffect(() => {
@@ -53,6 +71,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem("componentVisibilityList", JSON.stringify(showList));
   }, [showList]);
+
+  useEffect(() => {
+    localStorage.setItem("customDurations", JSON.stringify(customDurations));
+  }, [customDurations]);
 
   return (
     <>
@@ -76,11 +98,12 @@ function App() {
         </Button>
       </div>
 
-      {showMenu && <Menu onTimeSet={handleTimeSet} />}
+      {showMenu && <Menu onTimeSet={handleTimeSet} clearTimer={clearTimer} />}
       <Timer
         customDurations={customDurations}
         isPlaying={isPlaying}
         timerKey={timerKey}
+        isCustomSelected={timerType === "customTimer"}
         onComplete={() => setIsPlaying(false)}
       />
 
