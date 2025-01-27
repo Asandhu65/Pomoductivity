@@ -19,6 +19,7 @@ function App() {
 
   const [customDurations, setCustomDurations] = useState(() => {
     const savedDurations = localStorage.getItem("customDurations");
+
     return savedDurations
       ? JSON.parse(savedDurations)
       : {
@@ -29,39 +30,36 @@ function App() {
   });
 
   const [timerType, setTimerType] = useState("defaultTimer");
-
   const [isPlaying, setIsPlaying] = useState(false);
   const [timerKey, setTimerKey] = useState(0);
 
-  // Set the custom durations in the state when selected
   const handleTimeSet = useCallback((newDurations, type) => {
-    const { pomodoro, shortBreak, longBreak } = newDurations;
-    setCustomDurations({
-      pomodoro: pomodoro || 1500,
-      shortBreak: shortBreak || 300,
-      longBreak: longBreak || 900,
-    });
+    const updatedDurations = {
+      pomodoro: newDurations.pomodoro || 1500,
+      shortBreak: newDurations.shortBreak || 300,
+      longBreak: newDurations.longBreak || 900,
+    };
 
-    setTimerType(type || "defaultTimer");
+    setCustomDurations(updatedDurations);
+
+    setTimerType(type || "customTimer");
     setIsPlaying(false);
-    setTimerKey(prev => prev + 1); // Force a re-render of the Timer component
+    setTimerKey(prev => prev + 1);
   }, []);
 
-  // Control the timer state
   const handleStart = () => setIsPlaying(true);
   const handlePause = () => setIsPlaying(false);
 
   const handleReset = () => {
     setIsPlaying(false);
     setTimerKey(prev => prev + 1);
-    setCustomDurations(prev => ({ ...prev })); // Keep current custom timer settings on reset
+    setCustomDurations(prev => ({ ...prev }));
   };
 
-  // Clear Timer when switching to custom timer
   const clearTimer = () => {
     setIsPlaying(false);
     setCustomDurations({ pomodoro: 0, shortBreak: 0, longBreak: 0 });
-    setTimerKey(prevKey => prevKey + 1); // Force a reset of the timer component
+    setTimerKey(prevKey => prevKey + 1);
   };
 
   useEffect(() => {
@@ -98,7 +96,13 @@ function App() {
         </Button>
       </div>
 
-      {showMenu && <Menu onTimeSet={handleTimeSet} clearTimer={clearTimer} />}
+      {showMenu && (
+        <Menu
+          onTimeSet={newDurations => handleTimeSet(newDurations, "customTimer")}
+          clearTimer={clearTimer}
+        />
+      )}
+
       <Timer
         customDurations={customDurations}
         isPlaying={isPlaying}
@@ -129,6 +133,7 @@ function App() {
           Reset
         </Button>
       </div>
+
       {showList && <Todolist />}
     </>
   );

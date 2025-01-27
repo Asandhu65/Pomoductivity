@@ -1,26 +1,28 @@
-/* eslint-disable react/prop-types */
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
+import PropTypes from "prop-types";
 
 function Timer({
   isPlaying,
   timerKey,
   customDurations = { pomodoro: 1500, shortBreak: 300, longBreak: 900 },
-  isCustomSelected,
 }) {
   const [phase, setPhase] = useState(() => {
     const savedPhase = localStorage.getItem("phase");
     return savedPhase || "pomodoro";
   });
 
-  const storedDurations = JSON.parse(localStorage.getItem("customDurations"));
-  const effectiveDurations = storedDurations || customDurations;
+  const [effectiveDurations, setEffectiveDurations] = useState(customDurations);
+  const [currentDuration, setCurrentDuration] = useState(
+    customDurations.pomodoro
+  );
 
-  const [remainingTime, setRemainingTime] = useState(() => {
-    const savedRemainingTime = localStorage.getItem("remainingTime");
-    return savedRemainingTime
-      ? parseInt(savedRemainingTime, 10)
-      : effectiveDurations[phase];
+  const currentTimeRef = useRef(currentDuration);
+  const currentPhaseRef = useRef(phase);
+
+  const [cyclePosition, setCyclePosition] = useState(() => {
+    const savedPosition = localStorage.getItem("cyclePosition");
+    return savedPosition ? parseInt(savedPosition, 10) : 0;
   });
 
   const [pomoCount, setPomoCount] = useState(() => {
@@ -38,38 +40,52 @@ function Timer({
     return savedCount ? parseInt(savedCount, 10) : 0;
   });
 
-  const durations = useMemo(
-    () => ({
-      pomodoro: effectiveDurations.pomodoro || 1500,
-      shortBreak: effectiveDurations.shortBreak || 300,
-      longBreak: effectiveDurations.longBreak || 900,
-    }),
-    [effectiveDurations]
-  );
-
-  const remainingTimeRef = useRef(remainingTime);
-
-  // Save state to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem("remainingTime", remainingTime);
-    localStorage.setItem("phase", phase);
-  }, [remainingTime, phase]);
+    localStorage.setItem("cyclePosition", cyclePosition.toString());
+  }, [cyclePosition]);
 
-  // Reset remainingTime whenever phase or durations change
   useEffect(() => {
-    const updatedDuration = durations[phase];
-    if (updatedDuration) {
-      setRemainingTime(updatedDuration);
-    }
-  }, [phase, durations]);
+    setEffectiveDurations(customDurations);
+    setCurrentDuration(customDurations[phase]);
+  }, [customDurations, phase]);
 
-  // Update remainingTime when the radio button for custom timer is selected
+  const updateDocumentTitle = useCallback(time => {
+    currentTimeRef.current = time;
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+    const timeString = `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
+    const phaseLabel =
+      currentPhaseRef.current === "pomodoro"
+        ? "Focus"
+        : currentPhaseRef.current === "shortBreak"
+        ? "Short Break"
+        : "Long Break";
+    document.title = `${timeString} - ${phaseLabel}`;
+  }, []);
+
   useEffect(() => {
-    if (!isCustomSelected) {
-      setPhase("pomodoro");
-      setRemainingTime(durations.pomodoro);
-    }
-  }, [isCustomSelected, durations]);
+    currentPhaseRef.current = phase;
+  }, [phase]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        const intervalId = setInterval(() => {
+          if (isPlaying && currentTimeRef.current > 0) {
+            currentTimeRef.current -= 1;
+            updateDocumentTitle(currentTimeRef.current);
+          }
+        }, 1000);
+
+        return () => clearInterval(intervalId);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [isPlaying, updateDocumentTitle]);
 
   const playSound = () => {
     const audio = new Audio(
@@ -88,102 +104,86 @@ function Timer({
         return newCount;
       });
 
-      if ((pomoCount + 1) % 4 === 0) {
+      if (cyclePosition === 3) {
         setPhase("longBreak");
-        setLongBreakCount(prev => {
-          const newCount = prev + 1;
-          localStorage.setItem("longBreakCount", newCount);
-          return newCount;
-        });
-        setRemainingTime(durations.longBreak);
+        setCurrentDuration(effectiveDurations.longBreak);
       } else {
         setPhase("shortBreak");
+        setCurrentDuration(effectiveDurations.shortBreak);
+      }
+    } else {
+      if (phase === "shortBreak") {
         setShortBreakCount(prev => {
           const newCount = prev + 1;
           localStorage.setItem("shortBreakCount", newCount);
           return newCount;
         });
-        setRemainingTime(durations.shortBreak);
+        setCyclePosition(prev => prev + 1);
+      } else if (phase === "longBreak") {
+        setLongBreakCount(prev => {
+          const newCount = prev + 1;
+          localStorage.setItem("longBreakCount", newCount);
+          return newCount;
+        });
+        setCyclePosition(0);
       }
-    } else {
+
       setPhase("pomodoro");
-      setRemainingTime(durations.pomodoro);
+      setCurrentDuration(effectiveDurations.pomodoro);
     }
+  };
+
+  const handlePhaseChange = newPhase => {
+    setPhase(newPhase);
+    setCurrentDuration(effectiveDurations[newPhase]);
   };
 
   const handleResetCounters = () => {
     setPomoCount(0);
     setShortBreakCount(0);
     setLongBreakCount(0);
+    setCyclePosition(0);
     localStorage.removeItem("pomoCount");
     localStorage.removeItem("shortBreakCount");
     localStorage.removeItem("longBreakCount");
-
-    // Reset to the default duration based on the current phase
-    setRemainingTime(durations[phase]);
+    localStorage.removeItem("cyclePosition");
+    setCurrentDuration(effectiveDurations[phase]);
   };
-
-  const updateTitle = time => {
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-    const timeString = `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
-    const phaseLabel =
-      phase === "pomodoro"
-        ? "Focus"
-        : phase === "shortBreak"
-        ? "Short Break"
-        : "Long Break";
-
-    document.title = `${timeString} - ${phaseLabel}`;
-  };
-
-  useEffect(() => {
-    updateTitle(remainingTime);
-
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        updateTitle(remainingTimeRef.current);
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [remainingTime, phase]);
-
-  // UseEffect to handle play/pause logic
-  useEffect(() => {
-    if (isPlaying) {
-      const intervalId = setInterval(() => {
-        if (remainingTime > 0) {
-          setRemainingTime(prev => {
-            const newRemainingTime = prev - 1;
-            remainingTimeRef.current = newRemainingTime;
-            updateTitle(newRemainingTime);
-            return newRemainingTime;
-          });
-        }
-      }, 1000);
-
-      return () => clearInterval(intervalId);
-    }
-  }, [isPlaying, remainingTime]);
 
   return (
     <>
       <div className="flex justify-center items-center gap-4 mb-4">
-        <p className="text-xl text-white font-medium bg-grey bg-opacity-30 rounded-md w-56 p-2 flex justify-center">
+        <button
+          onClick={() => handlePhaseChange("pomodoro")}
+          className={`text-xl text-white font-medium rounded-md w-56 p-2 flex justify-center transition-colors ${
+            phase === "pomodoro"
+              ? "bg-gray-600 bg-opacity-60"
+              : "bg-grey bg-opacity-30 hover:bg-gray-600 hover:bg-opacity-40"
+          }`}
+        >
           Pomodoro: {pomoCount}
-        </p>
-        <p className="text-xl text-white font-medium bg-grey bg-opacity-30 rounded-md w-56 p-2 flex justify-center">
+        </button>
+        <button
+          onClick={() => handlePhaseChange("shortBreak")}
+          className={`text-xl text-white font-medium rounded-md w-56 p-2 flex justify-center transition-colors ${
+            phase === "shortBreak"
+              ? "bg-gray-600 bg-opacity-60"
+              : "bg-grey bg-opacity-30 hover:bg-gray-600 hover:bg-opacity-40"
+          }`}
+        >
           Short Break: {shortBreakCount}
-        </p>
+        </button>
         <div className="flex items-center gap-2">
-          <p className="text-xl text-white font-medium bg-grey bg-opacity-30 rounded-md w-56 p-2 flex justify-center">
+          <button
+            onClick={() => handlePhaseChange("longBreak")}
+            className={`text-xl text-white font-medium rounded-md w-56 p-2 flex justify-center transition-colors ${
+              phase === "longBreak"
+                ? "bg-gray-600 bg-opacity-60"
+                : "bg-grey bg-opacity-30 hover:bg-gray-600 hover:bg-opacity-40"
+            }`}
+          >
             Long Break: {longBreakCount}
-          </p>
+          </button>
           <button
             onClick={handleResetCounters}
             className="bg-red-500 text-white text-sm px-4 py-2 rounded-md hover:bg-red-600"
@@ -195,9 +195,9 @@ function Timer({
 
       <div className="flex flex-col items-center justify-center gap-2 pt-5">
         <CountdownCircleTimer
-          key={timerKey} // Ensure the timer resets when the key changes
+          key={`${timerKey}-${phase}`}
           isPlaying={isPlaying}
-          duration={remainingTime}
+          duration={currentDuration}
           colors={"#66666757"}
           size={600}
           strokeWidth={18}
@@ -207,26 +207,50 @@ function Timer({
             return { shouldRepeat: false };
           }}
         >
-          {({ remainingTime }) => (
-            <div className="flex flex-col items-center">
-              <div className="text-6xl text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
-                {Math.floor(remainingTime / 60)}:
-                {remainingTime % 60 < 10
-                  ? `0${remainingTime % 60}`
-                  : remainingTime % 60}
+          {({ remainingTime }) => {
+            updateDocumentTitle(remainingTime);
+            return (
+              <div className="flex flex-col items-center">
+                <div className="text-6xl text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
+                  {Math.floor(remainingTime / 60)}:
+                  {remainingTime % 60 < 10
+                    ? `0${remainingTime % 60}`
+                    : remainingTime % 60}
+                </div>
+                <div className="text-md text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
+                  {phase === "pomodoro"
+                    ? "Focus"
+                    : phase === "shortBreak"
+                    ? "Short Break"
+                    : "Long Break"}
+                </div>
               </div>
-              <div className="text-md text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
-                {phase === "pomodoro"
-                  ? "Focus"
-                  : phase === "shortBreak"
-                  ? "Short Break"
-                  : "Long Break"}
-              </div>
-            </div>
-          )}
+            );
+          }}
         </CountdownCircleTimer>
       </div>
     </>
   );
-} // test
+}
+Timer.propTypes = {
+  isPlaying: PropTypes.bool.isRequired,
+
+  timerKey: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+    .isRequired,
+
+  customDurations: PropTypes.shape({
+    pomodoro: PropTypes.number,
+    shortBreak: PropTypes.number,
+    longBreak: PropTypes.number,
+  }),
+};
+
+Timer.defaultProps = {
+  customDurations: {
+    pomodoro: 1500,
+    shortBreak: 300,
+    longBreak: 900,
+  },
+};
+
 export default Timer;
