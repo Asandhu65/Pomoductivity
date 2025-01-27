@@ -74,7 +74,7 @@ function Todolist() {
           placeholder="Enter a task"
         />
         <button
-          className="bg-grey bg-opacity-60 shadow-lg p-1 border-2 border-grey rounded-md"
+          className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-grey bg-opacity-60 shadow-lg p-1 border-grey rounded-md"
           onClick={addTask}
         >
           Add
@@ -97,13 +97,13 @@ function Todolist() {
                   onChange={e => setEditInput(e.target.value)}
                 />
                 <button
-                  className="bg-green-500 text-white p-1 rounded-md"
+                  className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-green-500 text-white p-1 rounded-md"
                   onClick={() => saveEdit(index)}
                 >
                   Save
                 </button>
                 <button
-                  className="bg-red-500 text-white p-1 rounded-md"
+                  className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-red-500 text-white p-1 rounded-md"
                   onClick={cancelEdit}
                 >
                   Cancel
@@ -119,13 +119,13 @@ function Todolist() {
                   {task.text}
                 </span>
                 <button
-                  className="bg-blue-500 text-white p-1 rounded-md"
+                  className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-blue-500 text-white p-1 rounded-md"
                   onClick={() => startEditing(task, index)}
                 >
                   Edit
                 </button>
                 <button
-                  className="bg-red-500 text-white p-1 rounded-md"
+                  className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-red-500 text-white p-1 rounded-md"
                   onClick={() => deleteTask(index)}
                 >
                   Delete

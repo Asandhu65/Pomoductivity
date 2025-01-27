@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import PropTypes from "prop-types";
+import { Button } from "./ui/button.jsx";
 
 function Timer({
   isPlaying,
@@ -153,37 +154,37 @@ function Timer({
   return (
     <>
       <div className="flex justify-center items-center gap-4 mb-4">
-        <button
+        <Button
           onClick={() => handlePhaseChange("pomodoro")}
-          className={`text-xl text-white font-medium rounded-md w-56 p-2 flex justify-center transition-colors ${
+          className={`[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] text-xl text-white font-medium rounded-md w-56 p-2 flex justify-center transition-colors ${
             phase === "pomodoro"
-              ? "bg-gray-600 bg-opacity-60"
-              : "bg-grey bg-opacity-30 hover:bg-gray-600 hover:bg-opacity-40"
+              ? "bg-grey bg-opacity-80"
+              : "bg-grey bg-opacity-30 hover:bg-opacity-40"
           }`}
         >
           Pomodoro: {pomoCount}
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => handlePhaseChange("shortBreak")}
-          className={`text-xl text-white font-medium rounded-md w-56 p-2 flex justify-center transition-colors ${
+          className={`[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] text-xl text-white font-medium rounded-md w-56 p-2 flex justify-center transition-colors ${
             phase === "shortBreak"
-              ? "bg-gray-600 bg-opacity-60"
-              : "bg-grey bg-opacity-30 hover:bg-gray-600 hover:bg-opacity-40"
+              ? "bg-grey bg-opacity-80"
+              : "bg-grey bg-opacity-30 hover:bg-opacity-40"
           }`}
         >
           Short Break: {shortBreakCount}
-        </button>
+        </Button>
         <div className="flex items-center gap-2">
-          <button
+          <Button
             onClick={() => handlePhaseChange("longBreak")}
-            className={`text-xl text-white font-medium rounded-md w-56 p-2 flex justify-center transition-colors ${
+            className={`[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] text-xl text-white font-medium rounded-md w-56 p-2 flex justify-center transition-colors ${
               phase === "longBreak"
-                ? "bg-gray-600 bg-opacity-60"
-                : "bg-grey bg-opacity-30 hover:bg-gray-600 hover:bg-opacity-40"
+                ? "bg-grey bg-opacity-80"
+                : "bg-grey bg-opacity-30 hover:bg-opacity-40"
             }`}
           >
             Long Break: {longBreakCount}
-          </button>
+          </Button>
           <button
             onClick={handleResetCounters}
             className="bg-red-500 text-white text-sm px-4 py-2 rounded-md hover:bg-red-600"
