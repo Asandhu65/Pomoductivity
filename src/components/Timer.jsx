@@ -185,12 +185,12 @@ function Timer({
           >
             Long Break: {longBreakCount}
           </Button>
-          <button
+          <Button
             onClick={handleResetCounters}
-            className="bg-red-500 text-white text-sm px-4 py-2 rounded-md hover:bg-red-600"
+            className="bg-grey bg-opacity-80 text-white text-sm px-4 py-2 rounded-md hover:bg-opacity-40 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]"
           >
             Reset
-          </button>
+          </Button>
         </div>
       </div>
 

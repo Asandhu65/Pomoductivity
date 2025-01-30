@@ -79,19 +79,19 @@ function App() {
       <div className="flex justify-between p-4">
         <Button
           onClick={() => setShowList(!showList)}
-          className="grey bg-opacity-20 shadow-lg p-2"
+          className="grey bg-opacity-20 p-2 shadow-lg hover:shadow-[0_0_15px_#141414] transition duration-500"
         >
-          <div className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
+          <div className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] ">
             To-Do List
           </div>
         </Button>
 
         <Button
           onClick={() => setShowMenu(!showMenu)}
-          className="grey bg-opacity-20 shadow-lg p-2 justify-end"
+          className="grey bg-opacity-20 shadow-lg p-2 justify-end hover:shadow-[0_0_15px_#D3D3D3] transition duration-500"
         >
           <div className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
-            Set Custom Timer
+            Set Timer
           </div>
         </Button>
       </div>

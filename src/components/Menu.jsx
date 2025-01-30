@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import { Button } from "./ui/button.jsx";
 
 function Menu({ onTimeSet }) {
   const [timerOptions, setTimerOptions] = useState(() => {
@@ -58,60 +59,74 @@ function Menu({ onTimeSet }) {
   return (
     <div className="relative">
       <div className="absolute right-1 mr-1 w-[200px]">
-        <div className="bg-grey bg-opacity-50 shadow-lg text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] rounded-md p-3">
+        <div className="bg-grey bg-opacity-20 shadow-lg text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] rounded-md p-3">
           <form onSubmit={handleSubmit}>
-            <label>Timer</label>
-            <br />
-            <label>Pomodoro</label>
-            <input
-              name="pomodoro"
-              className="text-black rounded m-1 w-1/4"
-              type="number"
-              min="1"
-              step="1"
-              value={timerOptions.customPomodoro || ""}
-              onChange={e =>
-                handleInputChange("customPomodoro", e.target.value)
-              }
-            />
-            <br />
-            <label>Short Break</label>
-            <input
-              name="shortBreak"
-              className="text-black rounded m-1 w-1/4"
-              type="number"
-              min="1"
-              step="1"
-              value={timerOptions.customShortBreak || ""}
-              onChange={e =>
-                handleInputChange("customShortBreak", e.target.value)
-              }
-            />
-            <br />
-            <label>Long Break</label>
-            <input
-              name="longBreak"
-              className="text-black rounded m-1 w-1/4"
-              type="number"
-              min="1"
-              step="1"
-              value={timerOptions.customLongBreak || ""}
-              onChange={e =>
-                handleInputChange("customLongBreak", e.target.value)
-              }
-            />
-            <br />
+            <div className="flex flex-col items-center space-y-2">
+              <label className="text-lg font-semibold">Timer</label>
 
-            {errorMessage && (
-              <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
-            )}
+              <div className="flex items-center space-x-2">
+                <label className="w-24 text-right [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
+                  Pomodoro
+                </label>
+                <input
+                  name="pomodoro"
+                  className="text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] rounded w-12 p-1 bg-grey bg-opacity-60 focus:ring-gray-600"
+                  min="1"
+                  step="1"
+                  value={timerOptions.customPomodoro || ""}
+                  onChange={e =>
+                    handleInputChange("customPomodoro", e.target.value)
+                  }
+                />
+              </div>
 
-            <button
-              type="submit"
-              className="bg-blue-500 text-white text-sm px-4 py-2 rounded-md hover:bg-blue-600 mt-2"
-            >
-              Apply
-            </button>
+              <div className="flex items-center space-x-2">
+                <label className="w-24 text-right [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
+                  Short Break
+                </label>
+                <input
+                  name="shortBreak"
+                  className="text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] rounded w-12 p-1 bg-grey bg-opacity-60 focus:ring-gray-600"
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={timerOptions.customShortBreak || ""}
+                  onChange={e =>
+                    handleInputChange("customShortBreak", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <label className="w-24 text-right [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
+                  Long Break
+                </label>
+                <input
+                  name="longBreak"
+                  className="text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] rounded w-12 p-1 bg-grey bg-opacity-60 focus:ring-gray-600"
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={timerOptions.customLongBreak || ""}
+                  onChange={e =>
+                    handleInputChange("customLongBreak", e.target.value)
+                  }
+                />
+              </div>
+
+              {errorMessage && (
+                <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+              )}
+            </div>
+
+            <div className="flex justify-center items-center my-5">
+              <Button
+                type="submit"
+                className="grey bg-opacity-80 p-2 shadow-[0_0_10px_#D3D3D3] hover:shadow-[0_0_25px_#D3D3D3] transition duration-300"
+              >
+                Apply
+              </Button>
+            </div>
           </form>
         </div>
       </div>
