@@ -5,6 +5,8 @@ import { useEffect, useState, useCallback } from "react";
 import Timer from "./components/Timer.jsx";
 import Menu from "./components/Menu.jsx";
 import Todolist from "./components/Todolist.jsx";
+import clock from "/src/assets/clock.svg";
+import list from "/src/assets/list.svg";
 
 function App() {
   const [showList, setShowList] = useState(() => {
@@ -81,7 +83,8 @@ function App() {
           onClick={() => setShowList(!showList)}
           className="grey bg-opacity-20 p-2 shadow-lg hover:shadow-[0_0_15px_#141414] transition duration-500"
         >
-          <div className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] ">
+          <div className="flex items-center gap-1 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] ">
+            <img src={list} className="w-5 h-5" />
             To-Do List
           </div>
         </Button>
@@ -90,7 +93,8 @@ function App() {
           onClick={() => setShowMenu(!showMenu)}
           className="grey bg-opacity-20 shadow-lg p-2 justify-end hover:shadow-[0_0_15px_#D3D3D3] transition duration-500"
         >
-          <div className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
+          <div className="flex items-center gap-2 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
+            <img src={clock} className="w-5 h-5" />
             Set Timer
           </div>
         </Button>

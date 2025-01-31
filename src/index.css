@@ -33,6 +33,10 @@ svg {
   filter: drop-shadow(4px 4px 4px rgba(0, 0, 0, 0.25));
 }
 
+.custom-timer path {
+  stroke-opacity: 0.6 !important;
+}
+
 .btns {
   display: flex;
   flex-direction: row;

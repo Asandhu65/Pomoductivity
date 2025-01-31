@@ -1,4 +1,11 @@
 import { useEffect, useState } from "react";
+import edit from "/src/assets/edit.svg";
+import deleteicon from "/src/assets/deleteicon.svg";
+import cancelicon from "/src/assets/cancelicon.svg";
+import saveicon from "/src/assets/saveicon.svg";
+import { Button } from "/src/components/ui/button.jsx";
+import "/src/index.css";
+import "/src/output.css";
 
 function Todolist() {
   const [toDos, setToDos] = useState(() => {
@@ -59,35 +66,60 @@ function Todolist() {
   };
 
   return (
-    <div className="bg-grey bg-opacity-20 shadow-lg text-white w-64 mb-3 rounded-md absolute left-3 top-14 p-3">
+    <div className="bg-grey bg-opacity-20 shadow-lg text-white w-100 mb-3 rounded-md absolute left-3 top-14 p-3">
       {toDos.length === 0 && (
-        <p className="flex justify-center text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
-          No tasks set.
-        </p>
+        <p className="flex justify-center text-white  pb-3">No Tasks Set</p>
       )}
       <div className="flex gap-2 mb-2">
         <input
-          className="text-black rounded flex-grow p-1"
+          className=" flex-grow text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] rounded p-1 bg-grey bg-opacity-60 placeholder-white"
           type="text"
           value={input}
           onChange={e => setInput(e.target.value)}
           placeholder="Enter a task"
         />
-        <button
-          className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-grey bg-opacity-60 shadow-lg p-1 border-grey rounded-md"
+        <Button
+          className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-grey bg-opacity-60 shadow-lg border-grey rounded-md p-2"
           onClick={addTask}
         >
-          Add
-        </button>
+          Add Task
+        </Button>
       </div>
       <ul className="space-y-2">
         {toDos.map((task, index) => (
           <li key={index} className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={task.completed}
-              onChange={() => toggleCompletion(index)}
-            />
+            <label className="flex items-center gap-2 ">
+              <input
+                className="hidden"
+                type="checkbox"
+                checked={task.completed}
+                onChange={() => toggleCompletion(index)}
+              />
+
+              <div
+                className={`w-5 h-5 border-2 border-white rounded-sm bg-transparent flex items-center justify-center shadow-md${
+                  task.completed ? "" : ""
+                }`}
+              >
+                {task.completed && (
+                  <svg
+                    className="w-5 h-5 text-white filter drop-shadow-[2.5px_2px_3px_rgb(0_0_0/_100%)]"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                )}
+              </div>
+            </label>
+
             {isEditing === index ? (
               <div className="flex gap-2 items-center flex-grow">
                 <input
@@ -96,40 +128,44 @@ function Todolist() {
                   value={editInput}
                   onChange={e => setEditInput(e.target.value)}
                 />
-                <button
-                  className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-green-500 text-white p-1 rounded-md"
+                <Button
+                  className="flex items-center gap-1 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-green-600 text-white p-2 rounded-md grey bg-opacity-50 shadow-lg"
                   onClick={() => saveEdit(index)}
                 >
+                  <img src={saveicon} className="w-5 h-5" />
                   Save
-                </button>
-                <button
-                  className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-red-500 text-white p-1 rounded-md"
+                </Button>
+                <Button
+                  className="flex items-center gap-1 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-red-600 text-white p-2 rounded-md grey bg-opacity-50 shadow-lg"
                   onClick={cancelEdit}
                 >
+                  <img src={cancelicon} className="w-5 h-5" />
                   Cancel
-                </button>
+                </Button>
               </div>
             ) : (
               <>
                 <span
-                  className={`flex-grow ${
-                    task.completed ? "line-through text-gray-700" : ""
+                  className={`flex-grow [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] ${
+                    task.completed ? "line-through text-gray-900" : ""
                   }`}
                 >
                   {task.text}
                 </span>
-                <button
-                  className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-blue-500 text-white p-1 rounded-md"
+                <Button
+                  className="flex items-center gap-1 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] text-white p-3 rounded-md grey bg-opacity-50 shadow-lg bg-blue-600"
                   onClick={() => startEditing(task, index)}
                 >
+                  <img src={edit} className="w-5 h-5" />
                   Edit
-                </button>
-                <button
-                  className="[text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-red-500 text-white p-1 rounded-md"
+                </Button>
+                <Button
+                  className="flex items-center gap-1 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)] bg-red-600 text-white p-3 rounded-md bg-opacity-50 shadow-lg"
                   onClick={() => deleteTask(index)}
                 >
+                  <img src={deleteicon} className="w-5 h-5" />
                   Delete
-                </button>
+                </Button>
               </>
             )}
           </li>

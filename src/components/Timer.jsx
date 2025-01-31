@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import PropTypes from "prop-types";
 import { Button } from "./ui/button.jsx";
+import reset from "/src/assets/reset.svg";
 
 function Timer({
   isPlaying,
@@ -189,20 +190,22 @@ function Timer({
             onClick={handleResetCounters}
             className="bg-grey bg-opacity-80 text-white text-sm px-4 py-2 rounded-md hover:bg-opacity-40 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]"
           >
+            <img src={reset} className="w-4 h-4 stroke-7" />
             Reset
           </Button>
         </div>
       </div>
 
-      <div className="flex flex-col items-center justify-center gap-2 pt-5">
+      <div className="flex flex-col items-center justify-center gap-2 pt-5 custom-timer">
         <CountdownCircleTimer
           key={`${timerKey}-${phase}`}
           isPlaying={isPlaying}
           duration={currentDuration}
-          colors={"#66666757"}
+          colors={["#D9D9D9"]}
+          trailColor="#3C3C3D"
           size={600}
           strokeWidth={18}
-          isSmoothColorTransition
+          strokeLinecap="round"
           onComplete={() => {
             handleCompletion();
             return { shouldRepeat: false };
@@ -212,13 +215,13 @@ function Timer({
             updateDocumentTitle(remainingTime);
             return (
               <div className="flex flex-col items-center">
-                <div className="text-6xl text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
+                <div className="text-9xl font-bold text-white text-opacity-80 [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
                   {Math.floor(remainingTime / 60)}:
                   {remainingTime % 60 < 10
                     ? `0${remainingTime % 60}`
                     : remainingTime % 60}
                 </div>
-                <div className="text-md text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
+                <div className="text-3xl text-white [text-shadow:_2.5px_2px_3px_rgb(0_0_0_/_100%)]">
                   {phase === "pomodoro"
                     ? "Focus"
                     : phase === "shortBreak"
