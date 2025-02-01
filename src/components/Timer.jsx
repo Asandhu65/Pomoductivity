@@ -86,7 +86,7 @@ function Timer({
 
   const playSound = () => {
     const audio = new Audio(
-      "src/assets/alarm-clock-ringing-fascinatedsound-1-00-03.mp3"
+      "public/alarm-clock-ringing-fascinatedsound-1-00-03.mp3"
     );
     audio.play();
   };
