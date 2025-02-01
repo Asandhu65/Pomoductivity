@@ -55,19 +55,14 @@ function Timer({
     currentTimeRef.current = time;
     const minutes = Math.floor(time / 60);
     const seconds = time % 60;
-    const timeString = `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
-    const phaseLabel =
-      currentPhaseRef.current === "pomodoro"
-        ? "Focus"
-        : currentPhaseRef.current === "shortBreak"
-        ? "Short Break"
-        : "Long Break";
-    document.title = `${timeString} - ${phaseLabel}`;
+    const timeString = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    const phaseLabels = {
+      pomodoro: "Focus",
+      shortBreak: "Short Break",
+      longBreak: "Long Break",
+    };
+    document.title = `${timeString} - ${phaseLabels[currentPhaseRef.current]}`;
   }, []);
-
-  useEffect(() => {
-    currentPhaseRef.current = phase;
-  }, [phase]);
 
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -108,9 +103,11 @@ function Timer({
 
       if (cyclePosition === 3) {
         setPhase("longBreak");
+        currentPhaseRef.current = "longBreak";
         setCurrentDuration(effectiveDurations.longBreak);
       } else {
         setPhase("shortBreak");
+        currentPhaseRef.current = "shortBreak";
         setCurrentDuration(effectiveDurations.shortBreak);
       }
     } else {
@@ -131,12 +128,27 @@ function Timer({
       }
 
       setPhase("pomodoro");
+      currentPhaseRef.current = "pomodoro";
       setCurrentDuration(effectiveDurations.pomodoro);
     }
   };
 
   const handlePhaseChange = newPhase => {
     setPhase(newPhase);
+    currentPhaseRef.current = newPhase;
+
+    const currentTime = currentTimeRef.current;
+    const minutes = Math.floor(currentTime / 60);
+    const seconds = currentTime % 60;
+    const timeString = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+
+    const phaseLabels = {
+      pomodoro: "Focus",
+      shortBreak: "Short Break",
+      longBreak: "Long Break",
+    };
+
+    document.title = `${timeString} - ${phaseLabels[newPhase]}`;
     setCurrentDuration(effectiveDurations[newPhase]);
   };
 
@@ -236,12 +248,11 @@ function Timer({
     </>
   );
 }
+
 Timer.propTypes = {
   isPlaying: PropTypes.bool.isRequired,
-
   timerKey: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
     .isRequired,
-
   customDurations: PropTypes.shape({
     pomodoro: PropTypes.number,
     shortBreak: PropTypes.number,
