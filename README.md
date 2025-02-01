@@ -17,7 +17,7 @@ Features
 Demo
 ----
 
-Check out the live demo: Pomoductivity Live *(Add your deployed link here)*
+Check out the live demo: Pomoductivity Live *(https://pomoductivityapp.netlify.app/)*
 
 Installation
 ------------
